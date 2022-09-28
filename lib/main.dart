@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_node/insertUser.dart';
+import 'package:flutter_node/updateUser.dart';
 import 'package:http/http.dart' as http;
 import 'models/models.dart';
 
@@ -21,11 +22,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         'insert': (context) => const InsertUser(),
+        'update': (context) => const UpdateUser(),
       },
       home: const MyHomePage(),
     );
   }
 }
+
+var Pid;
+var Pname;
+var Paddress;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -52,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await http.delete(Uri.parse('$link/$id'));
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,18 +78,39 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Card(
                       elevation: 3,
                       child: ListTile(
-                        title: Text(
-                          snapshot.data[index].name,
-                          style: const TextStyle(color: Colors.black),
+                        title: Column(
+                          children: [
+                            Text(
+                              snapshot.data[index].name,
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                            Text(
+                              snapshot.data[index].address,
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ],
                         ),
-                        leading: Text(snapshot.data[index].address),
-                        trailing: IconButton(
-                          onPressed: () => setState(() {
-                            deleteUser(snapshot.data[index].id);
-                          }),
+                        leading: IconButton(
+                          onPressed: () =>
+                              setState(() {
+                                deleteUser(snapshot.data[index].id);
+                              }),
                           icon: const Icon(
                             Icons.delete,
                             color: Colors.red,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            Pid = snapshot.data[index].id;
+                            Pname = snapshot.data[index].name;
+                            Paddress = snapshot.data[index].address;
+                            Navigator.of(context).pushNamed('update')
+                                .then((value) => setState(() {}));
+                          },
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.blue,
                           ),
                         ),
                       ),
@@ -90,14 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 });
           } else {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context)
-            .pushNamed('insert')
-            .then((value) => setState(() {})),
+        onPressed: () =>
+            Navigator.of(context)
+                .pushNamed('insert')
+                .then((value) => setState(() {})),
         child: const Icon(Icons.add),
       ),
     );

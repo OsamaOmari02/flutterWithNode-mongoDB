@@ -28,5 +28,14 @@ module.exports = {
         const id = req.params.id;
         const deletedUser = await Student.findByIdAndDelete(id);
         res.json({ "user deleted": deletedUser });
+    },
+    updateUser: async (req, res) => {
+        const id = req.params.id;
+        const data = [req.body.address, req.body.name];
+        const updatedUser = await Student.findByIdAndUpdate(id, {
+            name: data[1],
+            address: data[0]
+        });
+        res.json({ "user updated": updatedUser });
     }
 }
