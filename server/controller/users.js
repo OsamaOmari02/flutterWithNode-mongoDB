@@ -31,10 +31,9 @@ module.exports = {
     },
     updateUser: async (req, res) => {
         const id = req.params.id;
-        const data = [req.body.address, req.body.name];
         const updatedUser = await Student.findByIdAndUpdate(id, {
-            name: data[1],
-            address: data[0]
+            name: req.body.name,
+            address: req.body.address
         });
         res.json({ "user updated": updatedUser });
     }

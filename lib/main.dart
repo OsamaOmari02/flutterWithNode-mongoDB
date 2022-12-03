@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_node/insertUser.dart';
+import 'package:flutter_node/models/astronomy.dart';
 import 'package:flutter_node/updateUser.dart';
 import 'package:http/http.dart' as http;
 import 'models/models.dart';
@@ -41,23 +42,28 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const link = 'http://10.0.2.2:3000/users';
+  static const link =
+      'https://weatherapi-com.p.rapidapi.com/astronomy.json?q=LONDON';
+  late AstronomyModel data;
 
-  Future<List<UserModel>> getUsers() async {
-    List<UserModel> list = [];
-    final http.Response res = await http.get(Uri.parse(link));
+  Future getData() async {
+    final http.Response res = await http.get(Uri.parse(link), headers: {
+      'X-RapidAPI-Key': '859972f762mshc08e5949bf6150dp10d410jsnba4ebc3bd4e8',
+      'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
+    });
     if (res.statusCode == 200) {
-      list = (json.decode(res.body)['result'] as List)
-          .map((data) => UserModel.fromJson(data))
-          .toList();
+      print(json.decode(res.body));
+      data = AstronomyModel.fromJson(json.decode(res.body));
     }
-    return list;
+    // print("---------- $list");
+    return data;
   }
 
-  void deleteUser(id) async {
-    await http.delete(Uri.parse('$link/$id'));
+  @override
+  void initState() {
+    getData();
+    super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +73,11 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-        future: getUsers(),
+        future: getData(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
-                itemCount: snapshot.data.length,
+                itemCount: 2,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.all(4.0),
@@ -80,21 +86,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: ListTile(
                         title: Column(
                           children: [
-                            Text(
-                              snapshot.data[index].name,
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                            Text(
-                              snapshot.data[index].address,
-                              style: const TextStyle(color: Colors.black),
-                            ),
+                            buildText(data.location.name),
+                            buildText(data.astronomy.astro.sunset),
+                            buildText(data.astronomy.astro.sunrise),
+                            buildText(data.location.region)
                           ],
                         ),
                         leading: IconButton(
-                          onPressed: () =>
-                              setState(() {
-                                deleteUser(snapshot.data[index].id);
-                              }),
+                          onPressed: () => setState(() {
+                            // deleteUser(snapshot.data[index].id);
+                          }),
                           icon: const Icon(
                             Icons.delete,
                             color: Colors.red,
@@ -102,11 +103,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         trailing: IconButton(
                           onPressed: () {
-                            Pid = snapshot.data[index].id;
-                            Pname = snapshot.data[index].name;
-                            Paddress = snapshot.data[index].address;
-                            Navigator.of(context).pushNamed('update')
-                                .then((value) => setState(() {}));
+                            // Pid = snapshot.data[index].id;
+                            // Pname = snapshot.data[index].name;
+                            // Paddress = snapshot.data[index].address;
+                            // Navigator.of(context).pushNamed('update')
+                            //     .then((value) => setState(() {}));
                           },
                           icon: const Icon(
                             Icons.edit,
@@ -117,18 +118,29 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   );
                 });
-          } else {
-            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(
+                child: Text(
+              'Error',
+              style: TextStyle(color: Colors.red),
+            ));
           }
+          return const Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.of(context)
-                .pushNamed('insert')
-                .then((value) => setState(() {})),
+        onPressed: () => Navigator.of(context)
+            .pushNamed('insert')
+            .then((value) => setState(() {})),
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Text buildText(text) {
+    return Text(
+      text,
+      style: const TextStyle(color: Colors.black),
     );
   }
 }
