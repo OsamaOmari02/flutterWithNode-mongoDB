@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_node/insertUser.dart';
 import 'package:flutter_node/models/astronomy.dart';
+import 'package:flutter_node/shared/constants.dart';
 import 'package:flutter_node/updateUser.dart';
 import 'package:http/http.dart' as http;
-import 'models/models.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,20 +42,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const link =
-      'https://weatherapi-com.p.rapidapi.com/astronomy.json?q=LONDON';
+  static const link = Constants.baseURL;
   late AstronomyModel data;
 
   Future getData() async {
-    final http.Response res = await http.get(Uri.parse(link), headers: {
-      'X-RapidAPI-Key': '859972f762mshc08e5949bf6150dp10d410jsnba4ebc3bd4e8',
-      'X-RapidAPI-Host': 'weatherapi-com.p.rapidapi.com'
-    });
+    final http.Response res = await http.get(Uri.parse(link), headers: Constants.headers);
     if (res.statusCode == 200) {
       print(json.decode(res.body));
       data = AstronomyModel.fromJson(json.decode(res.body));
     }
-    // print("---------- $list");
     return data;
   }
 
