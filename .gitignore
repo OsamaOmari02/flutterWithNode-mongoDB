@@ -31,7 +31,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-/.env.dart
+/flutter_node.iml/lib/shared/constants.dart
+
 # Web related
 lib/generated_plugin_registrant.dart
 
